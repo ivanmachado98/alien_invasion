@@ -1,7 +1,10 @@
+import sys
+
 import pygame
 
 from settings import Settings
 from ship import Ship
+from bullet import Bullet
 
 class AlienInvasion:
     """Clase general para gestionar los recursos y el comportamiento del juego."""
@@ -20,11 +23,15 @@ class AlienInvasion:
         # Crea instancia de la nave.
         self.ship = Ship(self)
 
+        # Crea la bolsa de las balas.
+        self.bullets = pygame.sprite.Group()
+
     def run_game(self):
         """Inicia el bucle principal del juego."""
         while True:
             self._check_events()
             self.ship.update()
+            self._update_bullets()
             self._update_screen()
             self.clock.tick(60)
 
@@ -32,8 +39,7 @@ class AlienInvasion:
         """Responde a las pulsaciones de teclas y eventos del ratón."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+                sys.exit()
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP:
@@ -48,6 +54,8 @@ class AlienInvasion:
             self.ship.moving_right = True
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
+        elif event.key == pygame.K_SPACE:
+            self._fire_bullet()
 
     def _check_keyup_events(self, event):
         """Responde a levantamientos de teclas."""
@@ -56,9 +64,26 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
 
+    def _fire_bullet(self):
+        """Crea una bala y la añade al grupo de balas."""
+        if len(self.bullets) < self.settings.allowed_bullets:
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
+
+    def _update_bullets(self):
+        """Actualiza posición de las balas y se deshace se las viejas."""
+        self.bullets.update()
+
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom < 0:
+                self.bullets.remove(bullet)
+        print(len(self.bullets))
+
     def _update_screen(self):
         """Actualiza las imágenes en la pantalla y pasa a la nueva pantalla."""
         self.screen.fill(self.settings.bg_color)
+        for bullet in self.bullets.sprites():
+            bullet.draw_bullet()
         self.ship.blitme()
 
         pygame.display.flip()
