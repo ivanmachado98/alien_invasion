@@ -39,7 +39,7 @@ class Ship:
             self.x = 0
 
         # Actualiza posición del rect.
-        self.rect.x = self.x
+        self.rect.x = int(self.x)
 
     def blitme(self):
         """Dibuja la nave en la pantalla."""
