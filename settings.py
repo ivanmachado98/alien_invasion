@@ -9,6 +9,7 @@ class Settings:
 
         # Configuraciones de la nave.
         self.ship_speed = 10.0
+        self.allowed_ships = 3
 
         # Configuraciones de las balas.
         self.bullet_speed = 12.0

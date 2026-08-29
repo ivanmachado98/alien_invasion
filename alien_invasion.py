@@ -7,6 +7,7 @@ from settings import Settings
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
+from gamestats import GameStats
 
 class AlienInvasion:
     """Clase general para gestionar los recursos y el comportamiento del juego."""
@@ -24,6 +25,7 @@ class AlienInvasion:
 
         # Crea instancia de la nave.
         self.ship = Ship(self)
+        self.stats = GameStats(self)
 
         # Crea la bolsa de las balas y aliens.
         self.bullets = pygame.sprite.Group()
@@ -31,13 +33,19 @@ class AlienInvasion:
 
         self._create_fleet()
 
+        # Inicia el juego en modo activo.
+        self.game_active = True
+
     def run_game(self):
         """Inicia el bucle principal del juego."""
         while True:
             self._check_events()
-            self.ship.update()
-            self._update_bullets()
-            self._update_aliens()
+
+            if self.game_active:
+                self.ship.update()
+                self._update_bullets()
+                self._update_aliens()
+
             self._update_screen()
             self.clock.tick(60)
 
@@ -139,16 +147,22 @@ class AlienInvasion:
 
     def _ship_hit(self):
         """Responde si la nave ha sido alcanzada."""
-        # Elimina balas y aliens restantes.
-        self.aliens.empty()
-        self.bullets.empty()
+        if self.stats.ships_left > 0:
+            # Reduce ships_left.
+            self.stats.ships_left -= 1
 
-        # Crea una nueva flota y centra la nave.
-        self._create_fleet()
-        self.ship.center_ship()
+            # Elimina balas y aliens restantes.
+            self.bullets.empty()
+            self.aliens.empty()
 
-        # Pausa.
-        sleep(0.5)
+            # Crea una nueva flota y centra la nave.
+            self._create_fleet()
+            self.ship.center_ship()
+
+            # Pausa.
+            sleep(0.5)
+        else:
+            self.game_active = False
 
     def _check_alien_edges(self):
         """Responde si un alien llego al borde"""
